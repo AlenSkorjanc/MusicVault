@@ -1,46 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:music_vault/pages/main/profile.dart';
+import 'package:music_vault/pages/main/songs.dart';
+import 'package:music_vault/pages/main/tuner.dart';
+import 'package:music_vault/styles/colors.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key, required this.title});
-
-  final String title;
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  int _counter = 0;
+  int _selectedIndex = 1;
+  final PageController _pageController = PageController(initialPage: 1);
 
-  void _incrementCounter() {
+  void _onItemTapped(int index) {
     setState(() {
-      _counter++;
+      _selectedIndex = index;
+      _pageController.jumpToPage(index);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: const [
+          // Tuner Page
+          Tuner(),
+          // Home Page
+          Songs(),
+          // Profile Page
+          Profile(),
+        ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: _onItemTapped,
+        currentIndex: _selectedIndex,
+        backgroundColor: CustomColors.primaryColor,
+        selectedItemColor: CustomColors.neutralColorLight,
+        unselectedItemColor: CustomColors.neutralColorDark,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.tune_rounded),
+            label: 'Tuner',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.music_note),
+            label: 'Songs',
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person_3_rounded),
+              label: 'Profile',
+          )
+        ],
       ),
     );
   }

@@ -1,34 +1,47 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:music_vault/pages/login.dart';
+import 'package:music_vault/pages/home.dart';
+import 'package:music_vault/pages/authentication/login.dart';
+import 'package:music_vault/services/firebase_service.dart';
 import '../styles/colors.dart';
 import '../styles/dimes.dart';
 import '../styles/fonts.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 3), () {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const Login()),
-        );
-      });
-    });
+  State<SplashScreen> createState() => _SplashScreenState();
+}
 
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkSignedInState();
+    });
+  }
+
+  Future<void> _checkSignedInState() async {
+    User? currentUser = FirebaseService().currentUser;
+
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) =>
+              currentUser != null ? const Home() : const Login(),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Stack(
           children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: const BoxDecoration(
-                color: CustomColors.neutralColorLight,
-              ),
-            ),
-            // Center Title
             Center(
               child: SizedBox(
                 width: 200,
@@ -57,17 +70,15 @@ class SplashScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // R&A Company
             Positioned(
-              bottom: Dimens.spacingXS, // 16dp from the bottom
+              bottom: Dimens.spacingM,
               left: 0,
               right: 0,
               child: Center(
                 child: Text(
                   "R&A Company",
-                  style: TextStyles.heading5.copyWith(
+                  style: TextStyles.heading4.copyWith(
                     color: CustomColors.primaryColor,
-                    fontSize: 16.0,
                   ),
                   textAlign: TextAlign.center,
                 ),

@@ -4,10 +4,12 @@ import 'package:music_vault/styles/fonts.dart';
 
 class CustomText extends StatelessWidget {
   final String text;
+  final TextAlign textAlign;
 
   const CustomText({
     super.key,
     required this.text,
+    this.textAlign = TextAlign.left
   });
 
   @override
@@ -17,6 +19,7 @@ class CustomText extends StatelessWidget {
       style: TextStyles.input1.copyWith(
         color: CustomColors.secondaryColor,
       ),
+      textAlign: textAlign,
     );
   }
 }

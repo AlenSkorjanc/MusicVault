@@ -25,7 +25,6 @@ class TextFormInput extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
         decoration: InputDecoration(
           labelText: labelText,
           enabledBorder: OutlineInputBorder(

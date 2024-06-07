@@ -1,53 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:music_vault/components/button.dart';
+import 'package:music_vault/components/text_form_input.dart';
+import 'package:music_vault/components/link.dart';
+import 'package:music_vault/components/text.dart';
+import 'package:music_vault/pages/authentication/forgot_password.dart';
+import 'package:music_vault/pages/home.dart';
+import 'package:music_vault/pages/authentication/sign_up.dart';
 import 'package:music_vault/services/firebase_service.dart';
 import 'package:music_vault/styles/dimes.dart';
 import 'package:music_vault/styles/fonts.dart';
 import 'package:music_vault/utils/snackbar.dart';
-import 'package:music_vault/components/text_form_input.dart';
-import 'package:music_vault/components/button.dart';
-import 'package:music_vault/components/link.dart';
-import 'package:music_vault/components/text.dart';
 import 'package:music_vault/utils/validators.dart';
 
-class SignUp extends StatefulWidget {
-  const SignUp({super.key});
+class Login extends StatefulWidget {
+  const Login({super.key});
 
   @override
-  State<SignUp> createState() => _SignUpState();
+  State<Login> createState() => _LoginState();
 }
 
-class _SignUpState extends State<SignUp> {
+class _LoginState extends State<Login> {
   final FirebaseService firebaseService = FirebaseService();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  final repeatPasswordController = TextEditingController();
+  bool validated = false;
 
-  void navigateBack() {
-    Navigator.of(context).pop();
+  void _navigateToHome() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => const Home(),
+    ));
   }
 
-  void showToast(String message) {
+  void _navigateToNextView(Widget view) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => view),
+    );
+  }
+
+  void _showToast(String message) {
     SnackbarUtil.showToast(context, message);
   }
 
-  String? _validateRepeatPassword(String? value) {
-    if (value != passwordController.text) {
-      return 'Passwords do not match';
-    }
-    return null;
-  }
-
   void _submit() async {
+    setState(() {
+      validated = true;
+    });
+
     if (_formKey.currentState?.validate() ?? false) {
-      // Form is valid, proceed with sign up
-      await firebaseService.registerUser(
+      // Form is valid, proceed with login
+      var res = await firebaseService.loginUser(
         emailController.text,
         passwordController.text,
       );
-      navigateBack();
+
+      if (res.error != null && res.error!.isNotEmpty) {
+        _showToast(res.error!);
+        return;
+      }
+
+      if (firebaseService.currentUser != null) {
+        _navigateToHome();
+      } else {
+        _showToast('Login failed');
+      }
     } else {
-      showToast('Please correct the errors in the form');
+      _showToast('Please correct the errors in the form');
     }
   }
 
@@ -60,11 +79,14 @@ class _SignUpState extends State<SignUp> {
             width: 320,
             child: Form(
               key: _formKey,
+              autovalidateMode: validated
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Sign Up',
+                    'Login',
                     style: TextStyles.heading1,
                   ),
                   const SizedBox(height: Dimens.spacingXS),
@@ -81,32 +103,27 @@ class _SignUpState extends State<SignUp> {
                     validator: Validators.validatePassword,
                   ),
                   const SizedBox(height: Dimens.spacingXS),
-                  TextFormInput(
-                    labelText: 'Repeat Password',
-                    controller: repeatPasswordController,
-                    obscureText: true,
-                    validator: _validateRepeatPassword,
-                  ),
-                  const SizedBox(height: Dimens.spacingXS),
                   LinkText(
                     text: 'Forgot password?',
                     onPressed: () {
-                      // TODO: change destination
+                      _navigateToNextView(const ForgotPassword());
                     },
                   ),
                   const SizedBox(height: Dimens.spacingL),
                   Button(
-                    text: 'Create an Account',
+                    text: 'Login',
                     onPressed: _submit,
                   ),
                   const SizedBox(height: Dimens.spacingL),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const CustomText(text: 'Already have an account? '),
+                      const CustomText(text: 'Don\'t have an account? '),
                       LinkText(
-                        text: 'Sign In',
-                        onPressed: navigateBack,
+                        text: 'Create',
+                        onPressed: () {
+                          _navigateToNextView(const SignUp());
+                        },
                       ),
                     ],
                   ),
