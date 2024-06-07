@@ -7,4 +7,5 @@ class CustomColors {
   static const secondaryColorLight = Color(0xffadb5bd);
   static const neutralColorLight = Color(0xfff8f9fa);
   static const neutralColorDark = Color(0xff343a40);
+  static const errorColor = Color(0xffdf2d2d);
 }

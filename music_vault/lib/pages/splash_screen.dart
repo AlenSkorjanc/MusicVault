@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:music_vault/components/home_page.dart';
+import 'package:music_vault/pages/login.dart';
 import '../styles/colors.dart';
 import '../styles/dimes.dart';
 import '../styles/fonts.dart';
@@ -12,9 +12,7 @@ class SplashScreen extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(seconds: 3), () {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-              builder: (context) =>
-                  const MyHomePage(title: 'Flutter Demo Home Page')),
+          MaterialPageRoute(builder: (context) => const Login()),
         );
       });
     });

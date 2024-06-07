@@ -6,7 +6,7 @@ class TextStyles {
     fontWeight: FontWeight.w700,
     fontFamily: "Roboto",
     fontStyle:  FontStyle.normal,
-    fontSize: 24.0
+    fontSize: 36.0
 );
 
   static const heading2 = TextStyle(
@@ -41,7 +41,7 @@ class TextStyles {
     fontWeight: FontWeight.w300,
     fontFamily: "Roboto",
     fontStyle:  FontStyle.normal,
-    fontSize: 14.0
+    fontSize: 20.0
 );
 
   static const heading5 = TextStyle(
@@ -62,6 +62,6 @@ class TextStyles {
     fontWeight: FontWeight.w300,
     fontFamily: "Roboto",
     fontStyle:  FontStyle.normal,
-    fontSize: 10.0
+    fontSize: 16.0
 );
 }
