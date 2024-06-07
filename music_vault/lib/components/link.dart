@@ -4,25 +4,18 @@ import 'package:music_vault/styles/fonts.dart';
 
 class LinkText extends StatelessWidget {
   final String text;
-  final Widget nextView;
+  final VoidCallback onPressed;
 
   const LinkText({
     super.key,
     required this.text,
-    required this.nextView,
+    required this.onPressed,
   });
-
-  void _navigateToNextView(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => nextView),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _navigateToNextView(context),
+      onTap: onPressed,
       child: Text(
         text,
         style: TextStyles.input1.copyWith(
