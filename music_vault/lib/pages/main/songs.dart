@@ -4,7 +4,11 @@ import 'package:music_vault/styles/colors.dart';
 import 'package:music_vault/styles/dimes.dart';
 import 'package:music_vault/styles/fonts.dart';
 import 'package:music_vault/services/firebase_service.dart';
-import 'package:music_vault/pages/add_song.dart'; // Import the AddSong screen
+import 'package:music_vault/pages/add_song.dart';
+import 'package:flutter/material.dart';
+// import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:music_vault/pages/main/pdf_viewer_page.dart';
+
 
 class Songs extends StatefulWidget {
   const Songs({super.key});
@@ -35,6 +39,15 @@ class _SongsState extends State<Songs> {
   void _toggleFavorite(Song song) async {
     await firebaseService.toggleFavorite(song.id, song.favorite);
     _fetchSongs(); // Refresh the list after toggling favorite
+  }
+
+  void _openPdf(String pdfUrl) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PdfViewerPage(pdfUrl: pdfUrl),
+      ),
+    );
   }
 
   @override
@@ -87,6 +100,14 @@ class _SongsState extends State<Songs> {
                         _toggleFavorite(song);
                       },
                     ),
+                    onTap: () {
+                      if (song.pdfUrl != null) {
+                        print("SONG PDF " + song.pdfUrl);
+                        _openPdf(song.pdfUrl!);
+                      } else {
+                        // Handle case when PDF URL is not available
+                      }
+                    },
                   );
                 },
               ),
@@ -94,3 +115,28 @@ class _SongsState extends State<Songs> {
     );
   }
 }
+
+
+
+
+//MOVE THIS CLASS AFTER TESTING
+// class PdfViewerPage extends StatelessWidget {
+//   final String pdfUrl;
+
+//   const PdfViewerPage({required this.pdfUrl});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("PDF Viewer"),
+//       ),
+//       body: SfPdfViewer.network(
+//         pdfUrl,
+//         // Placeholders for loading and error cases
+//         loadingWidget: Center(child: CircularProgressIndicator()),
+//         errorWidget: (error) => Center(child: Text("Error loading PDF: $error")),
+//       ),
+//     );
+//   }
+// }
