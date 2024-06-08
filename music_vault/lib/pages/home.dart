@@ -57,7 +57,7 @@ class _HomeState extends State<Home> {
             label: 'Songs',
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.person_3_rounded),
+              icon: Icon(Icons.person_2_rounded),
               label: 'Profile',
           )
         ],
