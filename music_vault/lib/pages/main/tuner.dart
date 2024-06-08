@@ -47,7 +47,11 @@ class _TunerState extends State<Tuner> {
                 children: [
                   Text('-40', style: TextStyles.paragraph2),
                   Spacer(),
-                  Text('0', style: TextStyles.paragraph2),
+                  Padding(
+                    padding: EdgeInsets.only(
+                        right: 4),
+                    child: Text('0', style: TextStyles.paragraph2),
+                  ),
                   Spacer(),
                   Text('40', style: TextStyles.paragraph2),
                 ],

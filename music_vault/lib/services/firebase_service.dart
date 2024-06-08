@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -86,20 +87,32 @@ class FirebaseService {
       return 'An unexpected error occurred.';
     }
   }
-  
-  Future<String?> uploadProfilePicture(File imageFile) async {
+
+  Future<String?> getDefaultProfilePicture() async {
     try {
-      // Create a reference to the Firebase Storage location
-      final storageRef = storage.ref().child('profile_pictures/${currentUser?.uid}.jpg');
-
-      // Upload the file to Firebase Storage
-      await storageRef.putFile(imageFile);
-
-      // Get the download URL of the uploaded file
-      String downloadURL = await storageRef.getDownloadURL();
+      String downloadURL = await storage
+          .ref('profile_pictures/default_avatar.png')
+          .getDownloadURL();
       return downloadURL;
     } catch (e) {
-      print("Error uploading profile picture: $e");
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<String?> uploadProfilePicture(Uint8List imageData) async {
+    try {
+      // Create a reference to the location you want to upload to
+      Reference ref = storage.ref().child('profile_pictures/${currentUser!.uid}.png');
+
+      // Upload the file
+      UploadTask uploadTask = ref.putData(imageData);
+      TaskSnapshot snapshot = await uploadTask.whenComplete(() {});
+
+      // Get the download URL
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading profile picture: $e');
       return null;
     }
   }
@@ -124,7 +137,7 @@ class FirebaseService {
     }
   }
 
-Future<String?> updateEmail(String newEmail) async {
+  Future<String?> updateEmail(String newEmail) async {
     try {
       await currentUser!.verifyBeforeUpdateEmail(newEmail);
       return null;
@@ -145,7 +158,7 @@ Future<String?> updateEmail(String newEmail) async {
       return 'An unexpected error occurred.';
     }
   }
-  
+
   String _handleFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':

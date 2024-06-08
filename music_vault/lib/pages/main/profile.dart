@@ -1,13 +1,11 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'package:music_vault/components/button.dart';
 import 'package:music_vault/components/text_input.dart';
-import 'package:music_vault/components/text.dart';
 import 'package:music_vault/pages/authentication/login.dart';
 import 'package:music_vault/services/firebase_service.dart';
-import 'package:music_vault/styles/colors.dart';
+import 'package:music_vault/styles/dimes.dart';
 import 'package:music_vault/styles/fonts.dart';
 import 'package:music_vault/utils/navigator_helper.dart';
 import 'package:music_vault/utils/snackbar.dart';
@@ -16,24 +14,44 @@ class Profile extends StatefulWidget {
   const Profile({super.key});
 
   @override
-  _ProfileState createState() => _ProfileState();
+  State<Profile> createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FirebaseService firebaseService = FirebaseService();
   bool validated = false;
-  File? _image;
+  Uint8List? _image;
   final ImagePicker _picker = ImagePicker();
+  String? _imageUrl;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
+
     emailController.text = firebaseService.currentUser?.email ?? '';
     usernameController.text = firebaseService.currentUser?.displayName ?? '';
+
+    _loadDefaultImage();
+  }
+
+  Future<void> _loadDefaultImage() async {
+    if (firebaseService.currentUser?.photoURL != null &&
+        firebaseService.currentUser!.photoURL!.isNotEmpty) {
+      setState(() {
+        _imageUrl = firebaseService.currentUser!.photoURL;
+      });
+      return;
+    }
+
+    String? url = await firebaseService.getDefaultProfilePicture();
+    await firebaseService.updateProfilePicture(url!);
+    setState(() {
+      _imageUrl = url;
+    });
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -41,8 +59,10 @@ class _ProfileState extends State<Profile> {
       final pickedFile = await _picker.pickImage(source: source);
 
       if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+
         setState(() {
-          _image = File(pickedFile.path);
+          _image = bytes;
         });
       } else {
         _showToast('No image selected.');
@@ -57,34 +77,40 @@ class _ProfileState extends State<Profile> {
     SnackbarUtil.showToast(context, message);
   }
 
-  void _submit() async {
+  Future<bool?> _submitImage() async {
     if (_image != null) {
       String? imageUrl = await firebaseService.uploadProfilePicture(_image!);
+
+      setState(() {
+        _imageUrl = imageUrl;
+      });
 
       if (imageUrl != null) {
         var res = await firebaseService.updateProfilePicture(imageUrl);
 
         if (res != null && res.isNotEmpty) {
           _showToast(res);
-          return;
+          return false;
         }
 
-        if (mounted) {
-          _showToast('Profile picture updated successfully.');
-        }
+        setState(() {
+          _image = null;
+        });
+        return true;
       } else {
         _showToast('Failed to upload image.');
+        return false;
       }
-    } else {
-      _showToast('Please select an image.');
     }
+
+    return null;
   }
 
   void _submitForm() async {
     bool updated = false;
     String? updateMessage;
 
-     // Update email if changed
+    // Update email if changed
     if (emailController.text != firebaseService.currentUser?.email) {
       updateMessage = await firebaseService.updateEmail(emailController.text);
       if (updateMessage != null) {
@@ -96,7 +122,8 @@ class _ProfileState extends State<Profile> {
 
     // Update username if changed
     if (usernameController.text != firebaseService.currentUser?.displayName) {
-      updateMessage = await firebaseService.updateUsername(usernameController.text);
+      updateMessage =
+          await firebaseService.updateUsername(usernameController.text);
       if (updateMessage != null) {
         _showToast(updateMessage);
         return;
@@ -104,10 +131,19 @@ class _ProfileState extends State<Profile> {
       updated = true;
     }
 
-    if (updated) {
+    bool? imgRes = await _submitImage();
+
+    if (updated && imgRes == null || imgRes == true) {
       _showToast('Profile updated successfully.');
-    } else {
+    } else if (imgRes == null) {
       _showToast('No changes to update.');
+    }
+  }
+
+  void _logout() async {
+    await firebaseService.logoutUser();
+    if (mounted) {
+      NavigatorHelper.navigateToNextViewReplace(context, const Login());
     }
   }
 
@@ -115,14 +151,20 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+          ),
+        ],
         title: const Text(
-          'Settings',
+          'Profile',
           style: TextStyles.heading2,
         ),
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(Dimens.spacingXS),
           child: Form(
             key: _formKey,
             autovalidateMode: validated
@@ -132,37 +174,51 @@ class _ProfileState extends State<Profile> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // User profile picture
-                GestureDetector(
-                  onTap: () async {
-                    await _pickImage(ImageSource.gallery);
-                    _submit();
-                  },
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: _image != null
-                        ? kIsWeb
-                            ? NetworkImage(_image!.path) as ImageProvider
-                            : FileImage(_image!)
-                        : const AssetImage('assets/images/default_avatar.svg'),
-                    child: _image == null
-                        ? const Icon(Icons.add_a_photo, size: 50)
-                        : null,
-                  ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(80),
+                  child: _image != null
+                      ? Image.memory(
+                          _image!,
+                          width: 160,
+                          height: 160,
+                          fit: BoxFit.cover,
+                        )
+                      : _imageUrl != null
+                          ? Image.network(
+                              _imageUrl!,
+                              width: 160,
+                              height: 160,
+                              fit: BoxFit.cover,
+                            )
+                          : const SizedBox.shrink(),
                 ),
-                const SizedBox(height: 16),
-                // Email field
+                const SizedBox(height: Dimens.spacingXXS),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.photo_library),
+                      onPressed: () => _pickImage(ImageSource.gallery),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.camera_alt),
+                      onPressed: () => _pickImage(ImageSource.camera),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Dimens.spacingXS),
+                // Username field
                 TextInput(
                   labelText: 'Display name',
                   controller: usernameController,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Dimens.spacingXS),
                 // Email field
                 TextInput(
                   labelText: 'Email',
                   controller: emailController,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Dimens.spacingXS),
                 // Save button
                 Button(
                   text: 'Save',
@@ -173,17 +229,6 @@ class _ProfileState extends State<Profile> {
                     if (_formKey.currentState?.validate() ?? false) {
                       _submitForm();
                     }
-                  },
-                ),
-                const SizedBox(height: 16),
-                // Log out button
-                Button(
-                  text: 'Log Out',
-                  onPressed: () async {
-                    await firebaseService.logoutUser();
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const Login()),
-                    );
                   },
                 ),
               ],

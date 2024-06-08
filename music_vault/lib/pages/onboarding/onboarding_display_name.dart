@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:music_vault/components/button.dart';
-import 'package:music_vault/components/link.dart';
 import 'package:music_vault/components/text.dart';
 import 'package:music_vault/components/text_form_input.dart';
 import 'package:music_vault/pages/authentication/login.dart';
-import 'package:music_vault/pages/authentication/sign_up.dart';
 import 'package:music_vault/pages/onboarding/onboarding_profile_picture.dart';
 import 'package:music_vault/services/firebase_service.dart';
 import 'package:music_vault/styles/dimes.dart';
