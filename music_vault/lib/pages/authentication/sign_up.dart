@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:music_vault/services/firebase_service.dart';
 import 'package:music_vault/styles/dimes.dart';
 import 'package:music_vault/styles/fonts.dart';
+import 'package:music_vault/utils/navigator_helper.dart';
 import 'package:music_vault/utils/snackbar.dart';
 import 'package:music_vault/components/text_form_input.dart';
 import 'package:music_vault/components/button.dart';
@@ -24,11 +25,7 @@ class _SignUpState extends State<SignUp> {
   final repeatPasswordController = TextEditingController();
   bool validated = false;
 
-  void navigateBack() {
-    Navigator.of(context).pop();
-  }
-
-  void showToast(String message) {
+  void _showToast(String message) {
     SnackbarUtil.showToast(context, message);
   }
 
@@ -48,16 +45,17 @@ class _SignUpState extends State<SignUp> {
       // Form is valid, proceed with sign up
       var res = await firebaseService.registerUser(
         emailController.text,
-        passwordController.text
+        passwordController.text,
       );
 
-      if(res.error != null && res.error!.isNotEmpty) {
-        showToast(res.error!);
-      } else {
-        navigateBack();
+      if (mounted) {
+        NavigatorHelper.navigateToNextViewReplace(
+          context,
+          NavigatorHelper.getNextScreen(res.user),
+        );
       }
     } else {
-      showToast('Please correct the errors in the form');
+      _showToast('Please correct the errors in the form');
     }
   }
 
@@ -67,7 +65,7 @@ class _SignUpState extends State<SignUp> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: navigateBack,
+          onPressed: () => NavigatorHelper.navigateBack(context),
         ),
       ),
       body: Center(
@@ -76,7 +74,9 @@ class _SignUpState extends State<SignUp> {
             width: 320,
             child: Form(
               key: _formKey,
-              autovalidateMode: validated ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+              autovalidateMode: validated
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -116,7 +116,7 @@ class _SignUpState extends State<SignUp> {
                       const CustomText(text: 'Already have an account? '),
                       LinkText(
                         text: 'Sign In',
-                        onPressed: navigateBack,
+                        onPressed: () => NavigatorHelper.navigateBack(context),
                       ),
                     ],
                   ),

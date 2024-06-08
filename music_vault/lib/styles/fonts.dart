@@ -47,7 +47,7 @@ class TextStyles {
       fontWeight: FontWeight.w300,
       fontFamily: "Roboto",
       fontStyle: FontStyle.normal,
-      fontSize: 22.0);
+      fontSize: 20.0);
 
   static const input1 = TextStyle(
       fontWeight: FontWeight.w300,

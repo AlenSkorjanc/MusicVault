@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class UserResponse {
   User? user;
@@ -9,6 +13,7 @@ class UserResponse {
 
 class FirebaseService {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
 
   User? get currentUser => auth.currentUser;
 
@@ -69,6 +74,52 @@ class FirebaseService {
     } catch (e) {
       print("An unexpected error occurred: ${e.toString()}");
       return 'An unexpected error occurred.';
+    }
+  }
+
+  Future<String?> updateDisplayName(String displayName) async {
+    try {
+      await currentUser!.updateDisplayName(displayName);
+      return null;
+    } catch (e) {
+      print("An unexpected error occurred: ${e.toString()}");
+      return 'An unexpected error occurred.';
+    }
+  }
+Future<String?> uploadProfilePicture(File imageFile) async {
+    try {
+      // Create a reference to the Firebase Storage location
+      final storageRef = storage.ref().child('profile_pictures/${currentUser?.uid}.jpg');
+
+      // Upload the file to Firebase Storage
+      await storageRef.putFile(imageFile);
+
+      // Get the download URL of the uploaded file
+      String downloadURL = await storageRef.getDownloadURL();
+      return downloadURL;
+    } catch (e) {
+      print("Error uploading profile picture: $e");
+      return null;
+    }
+  }
+
+  Future<String?> updateProfilePicture(String photoURL) async {
+    try {
+      User? user = auth.currentUser;
+
+      if (user != null) {
+        await user.updateProfile(photoURL: photoURL);
+        await user.reload(); // Reload user to reflect the changes
+        user = auth.currentUser; // Get the updated user
+
+        print("User profile updated with photoURL: ${user!.photoURL}");
+        return null;
+      } else {
+        return "No user is currently signed in.";
+      }
+    } catch (e) {
+      print("Error updating profile picture: $e");
+      return e.toString();
     }
   }
 

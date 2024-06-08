@@ -14,13 +14,16 @@ class LinkText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Text(
-        text,
-        style: TextStyles.input1.copyWith(
-          color: CustomColors.primaryColorDark
-        )
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Text(
+          text,
+          style: TextStyles.input1.copyWith(
+            color: CustomColors.primaryColorDark,
+          ),
+        ),
       ),
     );
   }

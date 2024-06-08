@@ -19,4 +19,11 @@ class Validators {
     }
     return null;
   }
+
+  static String? validateNotEmpty(String fieldName, String? value) {
+    if (value == null || value.isEmpty || value.trim().isEmpty) {
+      return '$fieldName cannot be empty';
+    }
+    return null;
+  }
 }

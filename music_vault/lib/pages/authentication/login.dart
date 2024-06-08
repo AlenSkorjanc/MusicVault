@@ -4,11 +4,11 @@ import 'package:music_vault/components/text_form_input.dart';
 import 'package:music_vault/components/link.dart';
 import 'package:music_vault/components/text.dart';
 import 'package:music_vault/pages/authentication/forgot_password.dart';
-import 'package:music_vault/pages/home.dart';
 import 'package:music_vault/pages/authentication/sign_up.dart';
 import 'package:music_vault/services/firebase_service.dart';
 import 'package:music_vault/styles/dimes.dart';
 import 'package:music_vault/styles/fonts.dart';
+import 'package:music_vault/utils/navigator_helper.dart';
 import 'package:music_vault/utils/snackbar.dart';
 import 'package:music_vault/utils/validators.dart';
 
@@ -25,19 +25,6 @@ class _LoginState extends State<Login> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool validated = false;
-
-  void _navigateToHome() {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (context) => const Home(),
-    ));
-  }
-
-  void _navigateToNextView(Widget view) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => view),
-    );
-  }
 
   void _showToast(String message) {
     SnackbarUtil.showToast(context, message);
@@ -60,10 +47,11 @@ class _LoginState extends State<Login> {
         return;
       }
 
-      if (firebaseService.currentUser != null) {
-        _navigateToHome();
-      } else {
-        _showToast('Login failed');
+      if (mounted) {
+        NavigatorHelper.navigateToNextViewReplace(
+          context,
+          NavigatorHelper.getNextScreen(res.user),
+        );
       }
     } else {
       _showToast('Please correct the errors in the form');
@@ -106,7 +94,10 @@ class _LoginState extends State<Login> {
                   LinkText(
                     text: 'Forgot password?',
                     onPressed: () {
-                      _navigateToNextView(const ForgotPassword());
+                      NavigatorHelper.navigateToNextView(
+                        context,
+                        const ForgotPassword(),
+                      );
                     },
                   ),
                   const SizedBox(height: Dimens.spacingL),
@@ -122,7 +113,10 @@ class _LoginState extends State<Login> {
                       LinkText(
                         text: 'Create',
                         onPressed: () {
-                          _navigateToNextView(const SignUp());
+                          NavigatorHelper.navigateToNextView(
+                            context,
+                            const SignUp(),
+                          );
                         },
                       ),
                     ],
