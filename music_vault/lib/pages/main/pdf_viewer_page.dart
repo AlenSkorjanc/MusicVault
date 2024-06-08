@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:music_vault/components/button.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String pdfUrl;
@@ -134,9 +135,9 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ElevatedButton(
+                          Button(
                             onPressed: _isScrolling ? _stopAutoScroll : _startAutoScroll,
-                            child: Text(_isScrolling ? 'Stop Scroll' : 'Start Scroll'),
+                            text: _isScrolling ? 'Stop Scroll' : 'Start Scroll',
                           ),
                           Row(
                             children: [

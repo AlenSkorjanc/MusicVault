@@ -45,7 +45,7 @@ class _AddSongState extends State<AddSong> {
   }
 
   void _submit() async {
-    if (_formKey.currentState!.validate() && pdfUrl.isNotEmpty) {
+    if (_formKey.currentState!.validate()) {
       Song newSong = Song(
         id: '',
         title: title,
