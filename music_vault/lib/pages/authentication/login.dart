@@ -51,7 +51,7 @@ class _LoginState extends State<Login> {
       if (mounted) {
         NavigatorHelper.navigateToNextViewReplace(
           context,
-          const Home(), // DO NOT COMMIT
+          NavigatorHelper.getNextScreen(res.user),
         );
       }
     } else {

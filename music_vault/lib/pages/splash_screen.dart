@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(const Duration(seconds: 3), () {
       NavigatorHelper.navigateToNextViewReplace(
         context,
-        const Home(), //DO NOT COMMIT
+        NavigatorHelper.getNextScreen(currentUser),
       );
     });
   }
