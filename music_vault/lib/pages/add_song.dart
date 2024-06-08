@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:music_vault/services/firebase_service.dart';
+import 'package:music_vault/styles/dimes.dart';
+import 'package:music_vault/components/button.dart';
 
 class AddSong extends StatefulWidget {
   const AddSong({super.key});
@@ -117,17 +119,6 @@ class _AddSongState extends State<AddSong> {
                   });
                 },
               ),
-              Text(
-                fileName ?? 'No file selected',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
-              ),
-              ElevatedButton(
-                onPressed: _selectPdf,
-                child: const Text('Select PDF File'),
-              ),
               SwitchListTile(
                 title: const Text('Favorite'),
                 value: favorite,
@@ -137,9 +128,22 @@ class _AddSongState extends State<AddSong> {
                   });
                 },
               ),
-              ElevatedButton(
+              const SizedBox(height: Dimens.spacingXS),
+              Text(
+                fileName ?? 'No file selected',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              Button(
+                onPressed: _selectPdf,
+                text: 'Select PDF File',
+              ),
+              const SizedBox(height: Dimens.spacingXS),
+              Button(
+                text: 'Add Song',
                 onPressed: _submit,
-                child: const Text('Add Song'),
               ),
             ],
           ),
