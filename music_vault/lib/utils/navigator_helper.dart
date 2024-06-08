@@ -4,9 +4,14 @@ import 'package:music_vault/pages/authentication/login.dart';
 import 'package:music_vault/pages/home.dart';
 import 'package:music_vault/pages/onboarding/onboarding_display_name.dart';
 import 'package:music_vault/pages/onboarding/onboarding_profile_picture.dart';
+import 'package:music_vault/services/firebase_service.dart';
 
 class NavigatorHelper {
-  static Widget getNextScreen(User? currentUser) {
+  static Widget getNextScreen() {
+    final currentUser = FirebaseService().currentUser;
+
+    print(currentUser);
+
     if (currentUser == null) {
       return const Login();
     } else if (currentUser.displayName == null ||

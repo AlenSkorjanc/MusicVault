@@ -1,10 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:music_vault/pages/home.dart';
-import 'package:music_vault/pages/authentication/login.dart';
-import 'package:music_vault/pages/onboarding/onboarding_display_name.dart';
-import 'package:music_vault/pages/onboarding/onboarding_profile_picture.dart';
-import 'package:music_vault/services/firebase_service.dart';
 import 'package:music_vault/utils/navigator_helper.dart';
 import '../styles/colors.dart';
 import '../styles/dimes.dart';
@@ -27,12 +21,10 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkSignedInState() async {
-    User? currentUser = FirebaseService().currentUser;
-
     Future.delayed(const Duration(seconds: 3), () {
       NavigatorHelper.navigateToNextViewReplace(
         context,
-        NavigatorHelper.getNextScreen(currentUser),
+        NavigatorHelper.getNextScreen(),
       );
     });
   }

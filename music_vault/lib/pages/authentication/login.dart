@@ -5,7 +5,6 @@ import 'package:music_vault/components/link.dart';
 import 'package:music_vault/components/text.dart';
 import 'package:music_vault/pages/authentication/forgot_password.dart';
 import 'package:music_vault/pages/authentication/sign_up.dart';
-import 'package:music_vault/pages/home.dart';
 import 'package:music_vault/services/firebase_service.dart';
 import 'package:music_vault/styles/dimes.dart';
 import 'package:music_vault/styles/fonts.dart';
@@ -51,7 +50,7 @@ class _LoginState extends State<Login> {
       if (mounted) {
         NavigatorHelper.navigateToNextViewReplace(
           context,
-          NavigatorHelper.getNextScreen(res.user),
+          NavigatorHelper.getNextScreen(),
         );
       }
     } else {

@@ -43,7 +43,7 @@ class _SignUpState extends State<SignUp> {
 
     if (_formKey.currentState?.validate() ?? false) {
       // Form is valid, proceed with sign up
-      var res = await firebaseService.registerUser(
+      await firebaseService.registerUser(
         emailController.text,
         passwordController.text,
       );
@@ -51,7 +51,7 @@ class _SignUpState extends State<SignUp> {
       if (mounted) {
         NavigatorHelper.navigateToNextViewReplace(
           context,
-          NavigatorHelper.getNextScreen(res.user),
+          NavigatorHelper.getNextScreen(),
         );
       }
     } else {
