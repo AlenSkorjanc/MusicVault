@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class UserResponse {
   User? user;
@@ -14,6 +15,8 @@ class UserResponse {
 class FirebaseService {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
 
   User? get currentUser => auth.currentUser;
 
@@ -161,5 +164,102 @@ Future<String?> updateEmail(String newEmail) async {
       default:
         return 'An undefined Error happened.';
     }
+  }
+
+  //SONGS
+  Future<List<Song>> fetchSongs() async {
+
+    try {
+      if (currentUser == null) {
+        throw Exception("No user is currently signed in.");
+      }
+
+      QuerySnapshot snapshot = await firestore
+          .collection('songs')
+          .where('userId', isEqualTo: currentUser!.uid)
+          .orderBy('favorite', descending: true)
+          .get();
+    
+      return snapshot.docs.map((doc) => Song.fromFirestore(doc)).toList();
+    } catch (e) {
+      print("Error fetching user songs: $e");
+      return [];
+    }
+  }
+
+  Future<void> toggleFavorite(String songId, bool isFavorite) async {
+    try {
+      if (currentUser == null) {
+        throw Exception("No user is currently signed in.");
+      }
+
+      await firestore
+          .collection('users')
+          .doc(currentUser!.uid)
+          .collection('songs')
+          .doc(songId)
+          .update({'favorite': !isFavorite});
+    } catch (e) {
+      print("Error toggling favorite: $e");
+    }
+  }
+
+  Future<void> addSong(Song song) async {
+    try {
+      if (currentUser == null) {
+        throw Exception("No user is currently signed in.");
+      }
+
+      Map<String, dynamic> songData = song.toMap();
+      songData['userId'] = currentUser!.uid;
+
+      await firestore
+          .collection('songs')
+          .add(songData);
+    } catch (e) {
+      print("Error adding song: $e");
+    }
+  }
+
+}
+
+
+class Song {
+  final String id;
+  final String title;
+  final String authors;
+  final String genre;
+  final String pdfUrl;
+  final bool favorite;
+
+  Song({
+    required this.id,
+    required this.title,
+    required this.authors,
+    required this.genre,
+    required this.pdfUrl,
+    required this.favorite,
+  });
+
+  factory Song.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Song(
+      id: doc.id,
+      title: data['title'] ?? '',
+      authors: data['authors'] ?? '',
+      genre: data['genre'] ?? '',
+      pdfUrl: data['pdfUrl'] ?? '',
+      favorite: data['favorite'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'authors': authors,
+      'genre': genre,
+      'pdfUrl': pdfUrl,
+      'favorite': favorite,
+    };
   }
 }
