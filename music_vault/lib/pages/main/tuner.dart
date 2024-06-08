@@ -14,7 +14,7 @@ class Tuner extends StatefulWidget {
 }
 
 class _TunerState extends State<Tuner> {
-  String selectedInstrument = 'guitar';
+  String selectedInstrument = 'Guitar';
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +92,7 @@ class _TunerState extends State<Tuner> {
               child: Dropdown(
                 labelText: 'Select Instrument',
                 value: selectedInstrument,
-                items: const ['guitar', 'ukulele'],
+                items: const ['Guitar', 'Ukulele'],
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedInstrument = newValue!;
@@ -103,7 +103,7 @@ class _TunerState extends State<Tuner> {
             ),
             const SizedBox(height: Dimens.spacingS),
             Image.asset(
-              selectedInstrument == 'guitar'
+              selectedInstrument == 'Guitar'
                   ? 'assets/images/guitar_tuning.png'
                   : 'assets/images/ukulele_tuning.png',
               height: 192,
