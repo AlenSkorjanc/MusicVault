@@ -200,22 +200,19 @@ class FirebaseService {
     }
   }
 
-  Future<void> toggleFavorite(String songId, bool isFavorite) async {
-    try {
-      if (currentUser == null) {
-        throw Exception("No user is currently signed in.");
-      }
-
-      await firestore
-          .collection('users')
-          .doc(currentUser!.uid)
-          .collection('songs')
-          .doc(songId)
-          .update({'favorite': !isFavorite});
-    } catch (e) {
-      print("Error toggling favorite: $e");
+ Future<void> toggleFavorite(String songId, bool isFavorite) async {
+  try {
+    if (currentUser == null) {
+      throw Exception("No user is currently signed in.");
     }
+
+    DocumentReference songRef = firestore.collection('songs').doc(songId);
+
+    await songRef.update({'favorite': !isFavorite});
+  } catch (e) {
+    print("Error toggling favorite: $e");
   }
+}
 
   Future<void> addSong(Song song) async {
     try {
