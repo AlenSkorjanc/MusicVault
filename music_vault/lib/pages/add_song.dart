@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:music_vault/services/firebase_service.dart';
 
 class AddSong extends StatefulWidget {
@@ -17,9 +19,32 @@ class _AddSongState extends State<AddSong> {
   String genre = '';
   String pdfUrl = '';
   bool favorite = false;
+  String? fileName;
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
+  void _selectPdf() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null) {
+      PlatformFile file = result.files.first;
+      setState(() {
+        fileName = file.name;
+        pdfUrl = '';
+      });
+
+      if (file.bytes != null) {
+        String url = await firebaseService.uploadPdf(file.bytes!, file.name);
+        setState(() {
+          pdfUrl = url;
+        });
+      }
+    }
+  }
+
+  void _submit() async {
+    if (_formKey.currentState!.validate() && pdfUrl.isNotEmpty) {
       Song newSong = Song(
         id: '',
         title: title,
@@ -28,14 +53,15 @@ class _AddSongState extends State<AddSong> {
         pdfUrl: pdfUrl,
         favorite: favorite,
       );
+
       firebaseService.addSong(newSong).then((_) {
-        Navigator.pop(context, true); // Indicate that a new song was added
+        Navigator.pop(context, true); 
       }).catchError((error) {
-        // Handle errors if needed
         print("Error adding song: $error");
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,19 +117,16 @@ class _AddSongState extends State<AddSong> {
                   });
                 },
               ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'PDF URL'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the PDF URL';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  setState(() {
-                    pdfUrl = value;
-                  });
-                },
+              Text(
+                fileName ?? 'No file selected',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              ElevatedButton(
+                onPressed: _selectPdf,
+                child: const Text('Select PDF File'),
               ),
               SwitchListTile(
                 title: const Text('Favorite'),

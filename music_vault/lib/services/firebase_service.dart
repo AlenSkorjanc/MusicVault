@@ -231,6 +231,20 @@ class FirebaseService {
     }
   }
 
+    Future<String> uploadPdf(List<int> pdfBytes, String fileName) async {
+    try {
+      final Uint8List pdfData = Uint8List.fromList(pdfBytes);
+      final ref = storage.ref().child('pdfs').child(fileName);
+      final uploadTask = ref.putData(pdfData, SettableMetadata(contentType: 'application/pdf'));
+      final snapshot = await uploadTask.whenComplete(() {});
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print('Error uploading PDF: $e');
+      throw Exception('Error uploading PDF');
+    }
+  }
+
 }
 
 
