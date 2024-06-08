@@ -86,7 +86,8 @@ class FirebaseService {
       return 'An unexpected error occurred.';
     }
   }
-Future<String?> uploadProfilePicture(File imageFile) async {
+  
+  Future<String?> uploadProfilePicture(File imageFile) async {
     try {
       // Create a reference to the Firebase Storage location
       final storageRef = storage.ref().child('profile_pictures/${currentUser?.uid}.jpg');
@@ -123,6 +124,28 @@ Future<String?> uploadProfilePicture(File imageFile) async {
     }
   }
 
+Future<String?> updateEmail(String newEmail) async {
+    try {
+      await currentUser!.verifyBeforeUpdateEmail(newEmail);
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _handleFirebaseAuthException(e);
+    } catch (e) {
+      print("An unexpected error occurred: ${e.toString()}");
+      return 'An unexpected error occurred.';
+    }
+  }
+
+  Future<String?> updateUsername(String newUsername) async {
+    try {
+      await currentUser!.updateDisplayName(newUsername);
+      return null;
+    } catch (e) {
+      print("An unexpected error occurred: ${e.toString()}");
+      return 'An unexpected error occurred.';
+    }
+  }
+  
   String _handleFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':
