@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:buffered_list_stream/buffered_list_stream.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pitch_detector_dart/pitch_detector.dart';
 import 'package:pitchupdart/pitch_handler.dart';
@@ -10,9 +11,14 @@ import 'package:record/record.dart';
 
 class TunningState {
   final String note;
-  final String status;
+  final Color statusColor;
+  final double diffCents;
 
-  TunningState({required this.note, required this.status});
+  TunningState({
+    required this.note,
+    required this.statusColor,
+    required this.diffCents,
+  });
 }
 
 class PitchCubit extends Cubit<TunningState> {
@@ -21,12 +27,11 @@ class PitchCubit extends Cubit<TunningState> {
   final PitchHandler _pitchupDart;
 
   PitchCubit(this._audioRecorder, this._pitchDetectorDart, this._pitchupDart)
-      : super(
-          TunningState(
-            note: "N/A",
-            status: "Play something",
-          )
-        ) {
+      : super(TunningState(
+          note: '',
+          statusColor: Colors.green,
+          diffCents: -1.0,
+        )) {
     _init();
   }
 
@@ -49,29 +54,35 @@ class PitchCubit extends Cubit<TunningState> {
     await for (var audioSample in audioSampleBufferedStream) {
       final intBuffer = Uint8List.fromList(audioSample);
 
-      _pitchDetectorDart.getPitchFromIntBuffer(intBuffer).then((detectedPitch) {
-        if (detectedPitch.pitched) {
-          _pitchupDart.handlePitch(detectedPitch.pitch).then((pitchResult) => {
-                emit(
-                  TunningState(
-                    note: pitchResult.note,
-                    status: pitchResult.tuningStatus.getDescription(),
-                  ),
-                )
-              });
-        }
-      });
+      _pitchDetectorDart.getPitchFromIntBuffer(intBuffer).then(
+        (detectedPitch) {
+          if (detectedPitch.pitched) {
+            _pitchupDart.handlePitch(detectedPitch.pitch).then(
+                  (pitchResult) => {
+                    emit(
+                      TunningState(
+                        note: pitchResult.note,
+                        statusColor: pitchResult.tuningStatus.getColor(),
+                        diffCents: pitchResult.diffCents,
+                      ),
+                    ),
+                    
+                  },
+                );
+          }
+        },
+      );
     }
   }
 }
 
 extension Description on TuningStatus {
-  String getDescription() => switch (this) {
-        TuningStatus.tuned => "Tuned",
-        TuningStatus.toolow => "Too low. Tighten the string",
-        TuningStatus.toohigh => "Too hig. Give it some slack",
-        TuningStatus.waytoolow => "Way too low. Tighten the string",
-        TuningStatus.waytoohigh => "Way to high. Give it some slack",
-        TuningStatus.undefined => "Note is not in the valid interval.",
+  Color getColor() => switch (this) {
+        TuningStatus.tuned => Colors.green,
+        TuningStatus.toolow => Colors.orange,
+        TuningStatus.toohigh => Colors.orange,
+        TuningStatus.waytoolow => Colors.red,
+        TuningStatus.waytoohigh => Colors.red,
+        TuningStatus.undefined => Colors.red,
       };
 }
