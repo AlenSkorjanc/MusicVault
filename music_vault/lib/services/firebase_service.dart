@@ -251,7 +251,7 @@ class Song {
   final String title;
   final String authors;
   final String genre;
-  final String pdfUrl;
+  final String? pdfUrl;
   final bool favorite;
 
   Song({

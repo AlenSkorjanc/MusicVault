@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:music_vault/pages/authentication/login.dart';
 import 'package:music_vault/pages/home.dart';
@@ -9,8 +8,6 @@ import 'package:music_vault/services/firebase_service.dart';
 class NavigatorHelper {
   static Widget getNextScreen() {
     final currentUser = FirebaseService().currentUser;
-
-    print(currentUser);
 
     if (currentUser == null) {
       return const Login();
