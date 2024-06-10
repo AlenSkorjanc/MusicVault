@@ -21,6 +21,7 @@ class _AddSongState extends State<AddSong> {
   String pdfUrl = '';
   bool favorite = false;
   String? fileName;
+  bool isLoading = false;
 
   void _selectPdf() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -33,19 +34,32 @@ class _AddSongState extends State<AddSong> {
       setState(() {
         fileName = file.name;
         pdfUrl = '';
+        isLoading = true;
       });
 
       if (file.bytes != null) {
-        String url = await firebaseService.uploadPdf(file.bytes!, file.name);
+        try {
+          String url = await firebaseService.uploadPdf(file.bytes!, file.name);
+          setState(() {
+            pdfUrl = url;
+            isLoading = false;
+          });
+        } catch (e) {
+          print("Error uploading PDF: $e");
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
         setState(() {
-          pdfUrl = url;
+          isLoading = false;
         });
       }
     }
   }
 
   void _submit() async {
-    if (_formKey.currentState!.validate() && pdfUrl.isNotEmpty) {
+    if (_formKey.currentState!.validate()) {
       Song newSong = Song(
         id: '',
         title: title,
@@ -56,13 +70,18 @@ class _AddSongState extends State<AddSong> {
       );
 
       firebaseService.addSong(newSong).then((_) {
-        Navigator.pop(context, true); 
+        Navigator.pop(context, true);
       }).catchError((error) {
         print("Error adding song: $error");
       });
     }
   }
 
+  void _handleAddSong() {
+    if (fileName != null && pdfUrl.isNotEmpty && !isLoading) {
+      _submit();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,14 +154,16 @@ class _AddSongState extends State<AddSong> {
                   color: Colors.black87,
                 ),
               ),
-              Button(
-                onPressed: _selectPdf,
-                text: 'Select PDF File',
-              ),
+              isLoading
+                  ? CircularProgressIndicator()
+                  : Button(
+                      onPressed: _selectPdf,
+                      text: 'Select PDF File',
+                    ),
               const SizedBox(height: Dimens.spacingXS),
               Button(
                 text: 'Add Song',
-                onPressed: _submit,
+                onPressed: _handleAddSong,
               ),
             ],
           ),
